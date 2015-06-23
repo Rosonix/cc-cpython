@@ -19,17 +19,17 @@ if [ ! -e ${_BUILD} ]; then
     mkdir -p "${_BUILD}"
 fi
 
-cp -r "${ROOTFS}" "${_BUILD}"
-(cd "${GWLIB}" && cp *.so* *.a *.la "${_BUILD_ROOTFS}/lib")
-(cd "${GWLIB}/include" && cp -r * "${_BUILD_ROOTFS}/include")
-(cd "${SQLITE}" && cp *.h "${_BUILD_ROOTFS}/include")
-rm -rf "${_BUILD_ROOTFS}/include/openssl"
-
 ./configure
 make python Parser/pgen
 mv python hostpython
 mv Parser/pgen Parser/hostpgen
 make distclean
+
+cp -r "${ROOTFS}" "${_BUILD}"
+(cd "${GWLIB}" && cp *.so* *.a *.la "${_BUILD_ROOTFS}/lib")
+(cd "${GWLIB}/include" && cp -r * "${_BUILD_ROOTFS}/include")
+(cd "${SQLITE}" && cp *.h "${_BUILD_ROOTFS}/include")
+rm -rf "${_BUILD_ROOTFS}/include/openssl"
 
 patch -p1 < Python-2.7.3-xcompile.patch
 
