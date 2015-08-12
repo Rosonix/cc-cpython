@@ -1,28 +1,19 @@
-diff -ur Python-2.7.3.orig/configure Python-2.7.3-Source/configure
---- Python-2.7.3.orig/configure	2012-04-09 19:07:36.000000000 -0400
-+++ Python-2.7.3-Source/configure	2012-10-23 14:10:45.305220393 -0400
-@@ -13697,7 +13697,7 @@
-   $as_echo_n "(cached) " >&6
- else
-   if test "$cross_compiling" = yes; then :
--  ac_cv_have_long_long_format=no
-+  ac_cv_have_long_long_format="cross -- assuming yes"
- else
-   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
- /* end confdefs.h.  */
-@@ -13749,7 +13749,7 @@
- $as_echo "$ac_cv_have_long_long_format" >&6; }
- fi
- 
--if test "$ac_cv_have_long_long_format" = yes
-+if test "$ac_cv_have_long_long_format" != no
- then
- 
- $as_echo "#define PY_FORMAT_LONG_LONG \"ll\"" >>confdefs.h
-diff -ur Python-2.7.3.orig/Makefile.pre.in Python-2.7.3-Source/Makefile.pre.in
---- Python-2.7.3.orig/Makefile.pre.in	2012-04-09 19:07:33.000000000 -0400
-+++ Python-2.7.3-Source/Makefile.pre.in	2012-10-23 14:10:45.305220393 -0400
-@@ -182,6 +182,7 @@
+From 9a9ad4eb7e8023c35d320e59d789f9f49977a5c5 Mon Sep 17 00:00:00 2001
+From: Chang Yu-heng <mr.changyuheng@gmail.com>
+Date: Wed, 12 Aug 2015 14:41:30 +0800
+Subject: [PATCH 1/1] Python 2.7.3 ross compile patch
+
+---
+ Makefile.pre.in |  27 +++++++------
+ configure       |   4 +-
+ setup.py        | 116 ++++++++++++++++++++++++++++++++++++++++++--------------
+ 3 files changed, 106 insertions(+), 41 deletions(-)
+
+diff --git a/Makefile.pre.in b/Makefile.pre.in
+index e2237a9..b5d1ab5 100644
+--- a/Makefile.pre.in
++++ b/Makefile.pre.in
+@@ -182,6 +182,7 @@ UNICODE_OBJS=   @UNICODE_OBJS@
  
  PYTHON=		python$(EXE)
  BUILDPYTHON=	python$(BUILDEXE)
@@ -30,7 +21,7 @@ diff -ur Python-2.7.3.orig/Makefile.pre.in Python-2.7.3-Source/Makefile.pre.in
  
  # The task to run while instrument when building the profile-opt target
  PROFILE_TASK=	$(srcdir)/Tools/pybench/pybench.py -n 2 --with-gc --with-syscheck
-@@ -215,6 +216,8 @@
+@@ -215,6 +216,8 @@ LIBFFI_INCLUDEDIR=	@LIBFFI_INCLUDEDIR@
  # Parser
  PGEN=		Parser/pgen$(EXE)
  
@@ -39,7 +30,7 @@ diff -ur Python-2.7.3.orig/Makefile.pre.in Python-2.7.3-Source/Makefile.pre.in
  POBJS=		\
  		Parser/acceler.o \
  		Parser/grammar1.o \
-@@ -408,8 +411,8 @@
+@@ -408,8 +411,8 @@ platform: $(BUILDPYTHON)
  # Build the shared modules
  sharedmods: $(BUILDPYTHON)
  	@case $$MAKEFLAGS in \
@@ -50,7 +41,7 @@ diff -ur Python-2.7.3.orig/Makefile.pre.in Python-2.7.3-Source/Makefile.pre.in
  	esac
  
  # Build static library
-@@ -543,7 +546,7 @@
+@@ -543,7 +546,7 @@ Modules/python.o: $(srcdir)/Modules/python.c
  $(GRAMMAR_H) $(GRAMMAR_C): Parser/pgen.stamp
  Parser/pgen.stamp: $(PGEN) $(GRAMMAR_INPUT)
  		-@$(INSTALL) -d Include
@@ -59,7 +50,7 @@ diff -ur Python-2.7.3.orig/Makefile.pre.in Python-2.7.3-Source/Makefile.pre.in
  		-touch Parser/pgen.stamp
  
  $(PGEN):	$(PGENOBJS)
-@@ -938,26 +941,26 @@
+@@ -938,26 +941,26 @@ libinstall:	build_all $(srcdir)/Lib/$(PLATDIR) $(srcdir)/Modules/xxmodule.c
  		$(INSTALL_DATA) $(srcdir)/Modules/xxmodule.c \
  			$(DESTDIR)$(LIBDEST)/distutils/tests ; \
  	fi
@@ -93,7 +84,7 @@ diff -ur Python-2.7.3.orig/Makefile.pre.in Python-2.7.3-Source/Makefile.pre.in
  
  # Create the PLATDIR source directory, if one wasn't distributed..
  $(srcdir)/Lib/$(PLATDIR):
-@@ -1062,7 +1065,9 @@
+@@ -1062,7 +1065,9 @@ libainstall:	all python-config
  # Install the dynamically loadable modules
  # This goes into $(exec_prefix)
  sharedinstall: sharedmods
@@ -104,10 +95,33 @@ diff -ur Python-2.7.3.orig/Makefile.pre.in Python-2.7.3-Source/Makefile.pre.in
  	   	--prefix=$(prefix) \
  		--install-scripts=$(BINDIR) \
  		--install-platlib=$(DESTSHARED) \
-diff -ur Python-2.7.3.orig/setup.py Python-2.7.3-Source/setup.py
---- Python-2.7.3.orig/setup.py	2012-04-09 19:07:36.000000000 -0400
-+++ Python-2.7.3-Source/setup.py	2012-10-23 14:10:56.085220237 -0400
-@@ -145,6 +145,7 @@
+diff --git a/configure b/configure
+index 3948080..acf3c8a 100755
+--- a/configure
++++ b/configure
+@@ -13697,7 +13697,7 @@ $as_echo_n "checking for %lld and %llu printf() format support... " >&6; }
+   $as_echo_n "(cached) " >&6
+ else
+   if test "$cross_compiling" = yes; then :
+-  ac_cv_have_long_long_format=no
++  ac_cv_have_long_long_format="cross -- assuming yes"
+ else
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+@@ -13749,7 +13749,7 @@ fi
+ $as_echo "$ac_cv_have_long_long_format" >&6; }
+ fi
+ 
+-if test "$ac_cv_have_long_long_format" = yes
++if test "$ac_cv_have_long_long_format" != no
+ then
+ 
+ $as_echo "#define PY_FORMAT_LONG_LONG \"ll\"" >>confdefs.h
+diff --git a/setup.py b/setup.py
+index 6b47451..5006b84 100644
+--- a/setup.py
++++ b/setup.py
+@@ -145,6 +145,7 @@ class PyBuildExt(build_ext):
      def __init__(self, dist):
          build_ext.__init__(self, dist)
          self.failed = []
@@ -115,7 +129,7 @@ diff -ur Python-2.7.3.orig/setup.py Python-2.7.3-Source/setup.py
  
      def build_extensions(self):
  
-@@ -278,6 +279,14 @@
+@@ -278,6 +279,14 @@ class PyBuildExt(build_ext):
                            (ext.name, sys.exc_info()[1]))
              self.failed.append(ext.name)
              return
@@ -130,7 +144,7 @@ diff -ur Python-2.7.3.orig/setup.py Python-2.7.3-Source/setup.py
          # Workaround for Mac OS X: The Carbon-based modules cannot be
          # reliably imported into a command-line Python
          if 'Carbon' in ext.extra_link_args:
-@@ -369,9 +378,10 @@
+@@ -369,9 +378,10 @@ class PyBuildExt(build_ext):
  
      def detect_modules(self):
          # Ensure that /usr/local is always used
@@ -144,7 +158,7 @@ diff -ur Python-2.7.3.orig/setup.py Python-2.7.3-Source/setup.py
  
          # Add paths specified in the environment variables LDFLAGS and
          # CPPFLAGS for header and library files.
-@@ -408,7 +418,8 @@
+@@ -408,7 +418,8 @@ class PyBuildExt(build_ext):
                          add_dir_to_list(dir_list, directory)
  
          if os.path.normpath(sys.prefix) != '/usr' \
@@ -154,7 +168,7 @@ diff -ur Python-2.7.3.orig/setup.py Python-2.7.3-Source/setup.py
              # OSX note: Don't add LIBDIR and INCLUDEDIR to building a framework
              # (PYTHONFRAMEWORK is set) to avoid # linking problems when
              # building a framework with different architectures than
-@@ -426,11 +437,23 @@
+@@ -426,11 +437,23 @@ class PyBuildExt(build_ext):
          # lib_dirs and inc_dirs are used to search for files;
          # if a file is found in one of those directories, it can
          # be assumed that no additional -I,-L directives are needed.
@@ -183,7 +197,31 @@ diff -ur Python-2.7.3.orig/setup.py Python-2.7.3-Source/setup.py
          exts = []
          missing = []
  
-@@ -1004,13 +1027,24 @@
+@@ -702,10 +725,19 @@ class PyBuildExt(build_ext):
+         exts.append( Extension('_socket', ['socketmodule.c'],
+                                depends = ['socketmodule.h']) )
+         # Detect SSL support for the socket module (via _ssl)
+-        search_for_ssl_incs_in = [
+-                              '/usr/local/ssl/include',
+-                              '/usr/contrib/ssl/include/'
+-                             ]
++        if not self.cross_compile:
++            search_for_ssl_incs_in = [
++                '/usr/local/ssl/include',
++                '/usr/contrib/ssl/include/',
++            ]
++        else:
++            # The common install prefix of 3rd party headers used during
++            # cross compilation
++            mydir = os.environ.get('PYTHON_XCOMPILE_DEPENDENCIES_PREFIX')
++            if mydir:
++                search_for_ssl_incs_in = [mydir + '/include' ]
++            else:
++                search_for_ssl_incs_in = []
+         ssl_incs = find_file('openssl/ssl.h', inc_dirs,
+                              search_for_ssl_incs_in
+                              )
+@@ -1004,13 +1036,24 @@ class PyBuildExt(build_ext):
          # We hunt for #define SQLITE_VERSION "n.n.n"
          # We need to find >= sqlite version 3.0.8
          sqlite_incdir = sqlite_libdir = None
@@ -215,7 +253,7 @@ diff -ur Python-2.7.3.orig/setup.py Python-2.7.3-Source/setup.py
          MIN_SQLITE_VERSION_NUMBER = (3, 0, 8)
          MIN_SQLITE_VERSION = ".".join([str(x)
                                      for x in MIN_SQLITE_VERSION_NUMBER])
-@@ -1050,12 +1084,22 @@
+@@ -1050,12 +1093,22 @@ class PyBuildExt(build_ext):
                      print "sqlite: %s had no SQLITE_VERSION"%(f,)
  
          if sqlite_incdir:
@@ -244,7 +282,7 @@ diff -ur Python-2.7.3.orig/setup.py Python-2.7.3-Source/setup.py
              sqlite_libfile = self.compiler.find_library_file(
                                  sqlite_dirs_to_check + lib_dirs, 'sqlite3')
              if sqlite_libfile:
-@@ -1864,8 +1908,15 @@
+@@ -1864,8 +1917,15 @@ class PyBuildExt(build_ext):
  
                  # Pass empty CFLAGS because we'll just append the resulting
                  # CFLAGS to Python's; -g or -O2 is to be avoided.
@@ -262,3 +300,6 @@ diff -ur Python-2.7.3.orig/setup.py Python-2.7.3-Source/setup.py
  
                  res = os.system(cmd)
                  if res or not os.path.exists(ffi_configfile):
+-- 
+1.9.1
+
