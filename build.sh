@@ -29,9 +29,8 @@ cp -r "${ROOTFS}" "${_BUILD}"
 (cd "${GWLIB}" && cp *.so* *.a *.la "${_BUILD_ROOTFS}/lib")
 (cd "${GWLIB}/include" && cp -r * "${_BUILD_ROOTFS}/include")
 (cd "${SQLITE}" && cp *.h "${_BUILD_ROOTFS}/include")
-rm -rf "${_BUILD_ROOTFS}/include/openssl"
 
-patch -p1 < Python-2.7.3-xcompile.patch
+git apply Python-2.7.3-xcompile.patch
 
 export PYTHON_XCOMPILE_DEPENDENCIES_PREFIX="${_BUILD_ROOTFS}"
 CC="${TOOLCHAIN}/bin/mipsel-linux-gcc" CXX="${TOOLCHAIN}/bin/mipsel-linux-g++" AR="${TOOLCHAIN}/bin/mipsel-linux-ar" RANLIB="${TOOLCHAIN}/bin/mipsel-linux-ranlib" PYTHON_XCOMPILE_DEPENDENCIES_PREFIX="${_BUILD_ROOTFS}" ./configure --host=mipsel-linux --build=x86_64-linux-gnu
