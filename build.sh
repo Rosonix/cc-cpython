@@ -34,5 +34,8 @@ git apply Python-2.7.3-xcompile.patch
 
 export PYTHON_XCOMPILE_DEPENDENCIES_PREFIX="${_BUILD_ROOTFS}"
 CC="${TOOLCHAIN}/bin/mipsel-linux-gcc" CXX="${TOOLCHAIN}/bin/mipsel-linux-g++" AR="${TOOLCHAIN}/bin/mipsel-linux-ar" RANLIB="${TOOLCHAIN}/bin/mipsel-linux-ranlib" PYTHON_XCOMPILE_DEPENDENCIES_PREFIX="${_BUILD_ROOTFS}" ./configure --host=mipsel-linux --build=x86_64-linux-gnu
+
+git apply Python-2.7.3-xcompile-disable-epoll.patch
+
 make HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen BLDSHARED="${TOOLCHAIN}/bin/mipsel-linux-gcc -shared" CROSS_COMPILE="${TOOLCHAIN}/bin/mipsel-linux-" CROSS_COMPILE_TARGET=yes HOSTARCH=mipsel-linux BUILDARCH=x86_64-linux-gnu PYTHON_XCOMPILE_DEPENDENCIES_PREFIX="${_BUILD_ROOTFS}"
 make install HOSTPYTHON=./hostpython BLDSHARED="${TOOLCHAIN}/bin/mipsel-linux-gcc -shared" CROSS_COMPILE="${TOOLCHAIN}/bin/mipsel-linux-" CROSS_COMPILE_TARGET=yes prefix="${_BUILD}/python" PYTHON_XCOMPILE_DEPENDENCIES_PREFIX="${_BUILD_ROOTFS}"
