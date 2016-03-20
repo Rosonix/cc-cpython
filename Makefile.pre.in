@@ -272,6 +272,7 @@ LIBFFI_INCLUDEDIR=	@LIBFFI_INCLUDEDIR@
 ##########################################################################
 # Parser
 PGEN=		Parser/pgen$(EXE)
+HOSTPGEN=		Parser/hostpgen$(EXE)
 
 PSRCS=		\
 		Parser/acceler.c \
@@ -748,8 +749,8 @@ $(IO_OBJS): $(IO_H)
 
 $(GRAMMAR_H): $(GRAMMAR_INPUT) $(PGENSRCS)
 		@$(MKDIR_P) Include
-		$(MAKE) $(PGEN)
-		$(PGEN) $(GRAMMAR_INPUT) $(GRAMMAR_H) $(GRAMMAR_C)
+		# $(MAKE) $(PGEN)
+		$(HOSTPGEN) $(GRAMMAR_INPUT) $(GRAMMAR_H) $(GRAMMAR_C)
 $(GRAMMAR_C): $(GRAMMAR_H) $(GRAMMAR_INPUT) $(PGENSRCS)
 		$(MAKE) $(GRAMMAR_H)
 		touch $(GRAMMAR_C)
