@@ -217,11 +217,6 @@ class PyBuildExt(build_ext):
             # re-compile extensions if a header file has been changed
             ext.depends.extend(headers)
 
-            # If a module has already been built statically,
-            # don't build it here
-            if ext.name in sys.builtin_module_names:
-                self.extensions.remove(ext)
-
         # Parse Modules/Setup and Modules/Setup.local to figure out which
         # modules are turned on in the file.
         remove_modules = []
@@ -289,6 +284,17 @@ class PyBuildExt(build_ext):
                 return
 
         try:
+            if cross_compiling:
+                xcompile_dependency_dir = os.environ.get('PYTHON_XCOMPILE_DEPENDENCIES_PREFIX')
+                if xcompile_dependency_dir:
+                    if xcompile_dependency_dir + '/include' not in self.include_dirs:
+                        self.include_dirs += [xcompile_dependency_dir + '/include']
+                    if xcompile_dependency_dir + '/usr/include' not in self.include_dirs:
+                        self.include_dirs += [xcompile_dependency_dir + '/usr/include']
+                    if xcompile_dependency_dir + '/lib' not in self.library_dirs:
+                        self.library_dirs += [xcompile_dependency_dir + '/lib']
+                    if xcompile_dependency_dir + '/usr/lib' not in self.library_dirs:
+                        self.library_dirs += [xcompile_dependency_dir + '/usr/lib']
             build_ext.build_extension(self, ext)
         except (CCompilerError, DistutilsError) as why:
             self.announce('WARNING: building of extension "%s" failed: %s' %
@@ -456,6 +462,12 @@ class PyBuildExt(build_ext):
         # only change this for cross builds for 3.3, issues on Mageia
         if cross_compiling:
             self.add_gcc_paths()
+            xcompile_dependency_dir = os.environ.get('PYTHON_XCOMPILE_DEPENDENCIES_PREFIX')
+            if xcompile_dependency_dir:
+                add_dir_to_list(self.compiler.include_dirs, xcompile_dependency_dir + '/include')
+                add_dir_to_list(self.compiler.include_dirs, xcompile_dependency_dir + '/usr/include')
+                add_dir_to_list(self.compiler.library_dirs, xcompile_dependency_dir + '/lib')
+                add_dir_to_list(self.compiler.library_dirs, xcompile_dependency_dir + '/usr/lib')
         self.add_multiarch_paths()
 
         # Add paths specified in the environment variables LDFLAGS and
@@ -515,6 +527,12 @@ class PyBuildExt(build_ext):
         else:
             lib_dirs = self.compiler.library_dirs[:]
             inc_dirs = self.compiler.include_dirs[:]
+            xcompile_dependency_dir = os.environ.get('PYTHON_XCOMPILE_DEPENDENCIES_PREFIX')
+            if xcompile_dependency_dir:
+                inc_dirs += [xcompile_dependency_dir + '/include' ]
+                inc_dirs += [xcompile_dependency_dir + '/usr/include' ]
+                lib_dirs += [xcompile_dependency_dir + '/lib' ]
+                lib_dirs += [xcompile_dependency_dir + '/usr/lib' ]
         exts = []
         missing = []
 
@@ -762,18 +780,32 @@ class PyBuildExt(build_ext):
                               '/usr/local/ssl/include',
                               '/usr/contrib/ssl/include/'
                              ]
-        ssl_incs = find_file('openssl/ssl.h', inc_dirs,
-                             search_for_ssl_incs_in
-                             )
+        if cross_compiling:
+            xcompile_dependency_dir = os.environ.get('PYTHON_XCOMPILE_DEPENDENCIES_PREFIX')
+            if xcompile_dependency_dir:
+                inc_dirs += [xcompile_dependency_dir + '/include' ]
+                inc_dirs += [xcompile_dependency_dir + '/usr/include' ]
+                ssl_incs = find_file('openssl/ssl.h', inc_dirs, [])
+        else:
+            ssl_incs = find_file('openssl/ssl.h', inc_dirs,
+                                 search_for_ssl_incs_in
+                                 )
         if ssl_incs is not None:
             krb5_h = find_file('krb5.h', inc_dirs,
                                ['/usr/kerberos/include'])
             if krb5_h:
                 ssl_incs += krb5_h
-        ssl_libs = find_library_file(self.compiler, 'ssl',lib_dirs,
-                                     ['/usr/local/ssl/lib',
-                                      '/usr/contrib/ssl/lib/'
-                                     ] )
+        if cross_compiling:
+            xcompile_dependency_dir = os.environ.get('PYTHON_XCOMPILE_DEPENDENCIES_PREFIX')
+            if xcompile_dependency_dir:
+                lib_dirs += [xcompile_dependency_dir + '/lib' ]
+                lib_dirs += [xcompile_dependency_dir + '/usr/lib' ]
+                ssl_libs = find_library_file(self.compiler, 'ssl', lib_dirs, [])
+        else:
+            ssl_libs = find_library_file(self.compiler, 'ssl',lib_dirs,
+                                         ['/usr/local/ssl/lib',
+                                          '/usr/contrib/ssl/lib/'
+                                         ] )
 
         if (ssl_incs is not None and
             ssl_libs is not None):
@@ -1060,7 +1092,11 @@ class PyBuildExt(build_ext):
                              '/usr/local/include/sqlite3',
                              ]
         if cross_compiling:
+            xcompile_dependency_dir = os.environ.get('PYTHON_XCOMPILE_DEPENDENCIES_PREFIX')
             sqlite_inc_paths = []
+            if xcompile_dependency_dir:
+                sqlite_inc_paths += [xcompile_dependency_dir + '/include' ]
+                sqlite_inc_paths += [xcompile_dependency_dir + '/usr/include' ]
         MIN_SQLITE_VERSION_NUMBER = (3, 0, 8)
         MIN_SQLITE_VERSION = ".".join([str(x)
                                     for x in MIN_SQLITE_VERSION_NUMBER])
@@ -1107,6 +1143,12 @@ class PyBuildExt(build_ext):
                 os.path.join(sqlite_incdir, '..', '..', 'lib64'),
                 os.path.join(sqlite_incdir, '..', '..', 'lib'),
             ]
+            if cross_compiling:
+                xcompile_dependency_dir = os.environ.get('PYTHON_XCOMPILE_DEPENDENCIES_PREFIX')
+                sqlite_dirs_to_check = []
+                if xcompile_dependency_dir:
+                    sqlite_dirs_to_check += [xcompile_dependency_dir + '/lib' ]
+                    sqlite_dirs_to_check += [xcompile_dependency_dir + '/usr/lib' ]
             sqlite_libfile = self.compiler.find_library_file(
                                 sqlite_dirs_to_check + lib_dirs, 'sqlite3')
             if sqlite_libfile:
