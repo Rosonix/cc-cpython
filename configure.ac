@@ -1568,7 +1568,7 @@ fcntl.h grp.h \
 ieeefp.h io.h langinfo.h libintl.h process.h pthread.h \
 sched.h shadow.h signal.h stdint.h stropts.h termios.h \
 unistd.h utime.h \
-poll.h sys/devpoll.h sys/epoll.h sys/poll.h \
+poll.h sys/devpoll.h sys/poll.h \
 sys/audioio.h sys/xattr.h sys/bsdtty.h sys/event.h sys/file.h sys/ioctl.h \
 sys/kern_control.h sys/loadavg.h sys/lock.h sys/mkdev.h sys/modem.h \
 sys/param.h sys/select.h sys/sendfile.h sys/socket.h sys/statvfs.h \
@@ -3006,18 +3006,6 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <unistd.h>]], [[void *x=fsync]])],
 AC_MSG_CHECKING(for fdatasync)
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <unistd.h>]], [[void *x=fdatasync]])],
   [AC_DEFINE(HAVE_FDATASYNC, 1, Define if you have the 'fdatasync' function.)
-   AC_MSG_RESULT(yes)],
-  [AC_MSG_RESULT(no)
-])
-AC_MSG_CHECKING(for epoll)
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/epoll.h>]], [[void *x=epoll_create]])],
-  [AC_DEFINE(HAVE_EPOLL, 1, Define if you have the 'epoll' functions.)
-   AC_MSG_RESULT(yes)],
-  [AC_MSG_RESULT(no)
-])
-AC_MSG_CHECKING(for epoll_create1)
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/epoll.h>]], [[void *x=epoll_create1]])],
-  [AC_DEFINE(HAVE_EPOLL_CREATE1, 1, Define if you have the 'epoll_create1' function.)
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)
 ])
