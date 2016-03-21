@@ -59,7 +59,7 @@ rm -f pybuilddir.txt
 if test "$cross_compiling" = yes; then
     AC_MSG_CHECKING([for python interpreter for cross build])
     if test -z "$PYTHON_FOR_BUILD"; then
-        for interp in python$PACKAGE_VERSION python3 python; do
+        for interp in python$PACKAGE_VERSION python3.5 python3 python; do
 	    which $interp >/dev/null 2>&1 || continue
 	    if $interp -c 'import sys;sys.exit(not sys.version_info@<:@:2@:>@ >= (3,3))'; then
 	        break
@@ -1178,7 +1178,7 @@ fi
 AC_SUBST(READELF)
 
 AC_SUBST(ASDLGEN)
-AC_CHECK_PROGS(PYTHON, python$PACKAGE_VERSION python3 python, not-found)
+AC_CHECK_PROGS(PYTHON, python$PACKAGE_VERSION python3.5 python3 python, not-found)
 if test "$PYTHON" = not-found; then
     ASDLGEN="@echo python: $PYTHON! cannot run \$(srcdir)/Parser/asdl_c.py #"
 else
@@ -1186,7 +1186,7 @@ else
 fi
 
 AC_SUBST(OPCODEHGEN)
-AC_CHECK_PROGS(PYTHON, python$PACKAGE_VERSION python3 python, not-found)
+AC_CHECK_PROGS(PYTHON, python$PACKAGE_VERSION python3.5 python3 python, not-found)
 if test "$PYTHON" = not-found; then
     OPCODEHGEN="@echo python: $PYTHON! cannot run Tools/scripts/generate_opcode_h.py"
 else
