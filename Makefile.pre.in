@@ -276,6 +276,7 @@ LIBFFI_INCLUDEDIR=	@LIBFFI_INCLUDEDIR@
 ##########################################################################
 # Parser
 PGEN=		Parser/pgen$(EXE)
+HOSTPGEN=	Parser/hostpgen$(EXE)
 
 PSRCS=		\
 		Parser/acceler.c \
@@ -715,12 +716,12 @@ Programs/_freeze_importlib.o: Programs/_freeze_importlib.c Makefile
 Programs/_freeze_importlib: Programs/_freeze_importlib.o $(LIBRARY_OBJS_OMIT_FROZEN)
 	$(LINKCC) $(PY_LDFLAGS) -o $@ Programs/_freeze_importlib.o $(LIBRARY_OBJS_OMIT_FROZEN) $(LIBS) $(MODLIBS) $(SYSLIBS) $(LDLAST)
 
-Python/importlib_external.h: $(srcdir)/Lib/importlib/_bootstrap_external.py Programs/_freeze_importlib
-	./Programs/_freeze_importlib \
+Python/importlib_external.h: $(srcdir)/Lib/importlib/_bootstrap_external.py
+	./Programs/_host_freeze_importlib \
 		$(srcdir)/Lib/importlib/_bootstrap_external.py Python/importlib_external.h
 
-Python/importlib.h: $(srcdir)/Lib/importlib/_bootstrap.py Programs/_freeze_importlib
-	./Programs/_freeze_importlib \
+Python/importlib.h: $(srcdir)/Lib/importlib/_bootstrap.py
+	./Programs/_host_freeze_importlib \
 		$(srcdir)/Lib/importlib/_bootstrap.py Python/importlib.h
 
 
@@ -781,9 +782,9 @@ Python/sysmodule.o: $(srcdir)/Python/sysmodule.c Makefile
 
 $(IO_OBJS): $(IO_H)
 
-$(GRAMMAR_H): $(GRAMMAR_INPUT) $(PGEN)
+$(GRAMMAR_H): $(GRAMMAR_INPUT)
 		@$(MKDIR_P) Include
-		$(PGEN) $(GRAMMAR_INPUT) $(GRAMMAR_H) $(GRAMMAR_C)
+		$(HOSTPGEN) $(GRAMMAR_INPUT) $(GRAMMAR_H) $(GRAMMAR_C)
 $(GRAMMAR_C): $(GRAMMAR_H)
 		touch $(GRAMMAR_C)
 

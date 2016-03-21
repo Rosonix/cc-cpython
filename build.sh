@@ -2,7 +2,11 @@
 
 set -e
 
-touch Include/graminit.h
+./configure
+make Parser/pgen Programs/_freeze_importlib
+mv Parser/pgen Parser/hostpgen
+mv Programs/_freeze_importlib Programs/_host_freeze_importlib
+make clean
 
 ROOT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 BUILD_DIR="${ROOT_DIR}/build"
@@ -29,5 +33,6 @@ CONFIG_SITE=config.site ./configure --host=mipsel-linux --build=x86_64-linux-gnu
 
 export PYTHON_XCOMPILE_DEPENDENCIES_PREFIX="${BUILD_DIR}"
 
-make BLDSHARED="${TOOLCHAIN}/bin/mipsel-linux-gcc -shared" CROSS_COMPILE="${TOOLCHAIN}/bin/mipsel-linux-" HOSTARCH=mipsel-linux BUILDARCH=x86_64-linux-gnu
+touch Include/graminit.h
+
 make install BLDSHARED="${TOOLCHAIN}/bin/mipsel-linux-gcc -shared" CROSS_COMPILE="${TOOLCHAIN}/bin/mipsel-linux-" prefix="${OUT_DIR}" ENSUREPIP=no
