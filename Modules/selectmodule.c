@@ -2133,9 +2133,6 @@ kqueue_queue_control(kqueue_queue_Object *self, PyObject *args)
             return NULL;
         }
 
-        if (_PyTime_AsTimespec(timeout, &timeoutspec) == -1)
-            return NULL;
-
         if (timeoutspec.tv_sec < 0) {
             PyErr_SetString(PyExc_ValueError,
                             "timeout must be positive or None");
@@ -2209,8 +2206,6 @@ kqueue_queue_control(kqueue_queue_Object *self, PyObject *args)
                 gotevents = 0;
                 break;
             }
-            if (_PyTime_AsTimespec(timeout, &timeoutspec) == -1)
-                goto error;
             /* retry kevent() with the recomputed timeout */
         }
     } while (1);

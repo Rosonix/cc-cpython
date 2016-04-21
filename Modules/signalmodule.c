@@ -1051,9 +1051,6 @@ signal_sigtimedwait_impl(PyModuleDef *module, PyObject *sigset,
     deadline = _PyTime_GetMonotonicClock() + timeout;
 
     do {
-        if (_PyTime_AsTimespec(timeout, &ts) < 0)
-            return NULL;
-
         Py_BEGIN_ALLOW_THREADS
         res = sigtimedwait(&set, &si, &ts);
         Py_END_ALLOW_THREADS

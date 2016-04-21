@@ -630,14 +630,6 @@ pymonotonic(_PyTime_t *tp, _Py_clock_info_t *info, int raise)
 
     assert(info == NULL || raise);
 
-    if (clock_gettime(clk_id, &ts) != 0) {
-        if (raise) {
-            PyErr_SetFromErrno(PyExc_OSError);
-            return -1;
-        }
-        return -1;
-    }
-
     if (info) {
         struct timespec res;
         info->monotonic = 1;
@@ -649,8 +641,6 @@ pymonotonic(_PyTime_t *tp, _Py_clock_info_t *info, int raise)
         }
         info->resolution = res.tv_sec + res.tv_nsec * 1e-9;
     }
-    if (_PyTime_FromTimespec(tp, &ts, raise) < 0)
-        return -1;
 #endif
     return 0;
 }
