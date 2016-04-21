@@ -3542,15 +3542,6 @@ AC_CHECK_FUNCS(gettimeofday,
     ])
 )
 
-AC_CHECK_FUNCS(clock_gettime, [], [
-    AC_CHECK_LIB(rt, clock_gettime, [
-        LIBS="$LIBS -lrt"
-        AC_DEFINE(HAVE_CLOCK_GETTIME, 1)
-        AC_DEFINE(TIMEMODULE_LIB, [rt],
-                  [Library needed by timemodule.c: librt may be needed for clock_gettime()])
-    ])
-])
-
 AC_CHECK_FUNCS(clock_getres, [], [
     AC_CHECK_LIB(rt, clock_getres, [
         AC_DEFINE(HAVE_CLOCK_GETRES, 1)
